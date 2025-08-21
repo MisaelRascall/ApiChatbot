@@ -52,7 +52,6 @@ switch ($method) {
         // Leyendo el ID desde el Body (JSON o raw data)
         if(!$id){
             parse_str(file_get_contents("php://input"), $data);
-            //echo json_encode(["Contenido del ID: " => $data['id']]);
             $id = $data['id'] ?? null;
         }
 
