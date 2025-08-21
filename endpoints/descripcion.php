@@ -28,7 +28,13 @@ switch ($method) {
 
     case 'DELETE':
         $id = $_GET['id'] ?? null;
-        if ($id) {
+
+        if(!$id){
+            parse_str(file_get_contents("php://input"), $data);
+            $id = $data['id'] ?? null;
+        }
+
+        if (isset($id)) {
             $stmt = $conn->prepare("DELETE FROM categorias WHERE id=?");
             $stmt->execute([$id]);
             echo json_encode(["status" => "Categoría eliminada"]);
