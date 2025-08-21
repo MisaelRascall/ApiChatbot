@@ -8,8 +8,3 @@ RewriteCond %{REQUEST_FILENAME} !-d
 
 # Redirigir todo lo demás a api.php
 RewriteRule ^(.*)$ public/api.php [QSA,L]
-
-# Proteger la carpeta endpoints (si alguien intenta acceder desde navegador)
-<Directory "/ApiChatbot/endpoints">
-    Require all denied
-</Directory>
