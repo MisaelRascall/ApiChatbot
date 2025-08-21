@@ -7,7 +7,7 @@ switch ($method) {
 
     case 'POST':
         $data = json_decode(file_get_contents("php://input"), true);
-        
+
         if (!isset($data['nombre']) || !isset($data['descripcion'])) {
             echo json_encode(["error" => "Faltan datos"]);
             break;
@@ -28,10 +28,43 @@ switch ($method) {
         }
         break;
 
+    case 'PUT':
+        $data = json_decode(file_get_contents("php://input"), true);
+        
+        $id = $data['id'] ?? null;
+        $nombre = $data['nombre'] ?? null;
+        $descripcion = $data['descripcion'] ?? null;
+
+        if (!$id || !$nombre || !$descripcion) {
+            http_response_code(400);
+            echo json_encode(["error" => "Faltan datos obligatorios"]);
+            exit();
+        }
+
+        try {
+            $sql = "UPDATE categorias SET nombre = :nombre, descripcion = :descripcion WHERE id = :id";
+            $stmt = $conn->prepare($sql);
+            $stmt->bindParam(':nombre', $nombre);
+            $stmt->bindParam(':descripcion', $descripcion);
+            $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+
+            if ($stmt->execute()) {
+                echo json_encode(["message" => "Categoría actualizada con éxito"]);
+            } else {
+                http_response_code(500);
+                echo json_encode(["error" => "No se pudo actualizar la categoría"]);
+            }
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(["error" => $e->getMessage()]);
+        }
+
+        break;
+
     case 'DELETE':
         $id = $_GET['id'] ?? null;
-        
-        if(!$id){
+
+        if (!$id) {
             parse_str(file_get_contents("php://input"), $data);
             $id = $data['id'] ?? null;
         }
