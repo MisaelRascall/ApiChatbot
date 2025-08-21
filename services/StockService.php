@@ -54,3 +54,46 @@ function validarDisponibilidad(PDO $conn, int $productoId): bool {
     return ($producto['stock'] > 0) && ($producto['isAvailable'] == true);
 }
 
+/**
+ * Resta unidades al stock de un producto
+ * 
+ * @param PDO $conn Objeto de conexión a la base de datos
+ * @param int $productoId ID del producto
+ * @param int $cantidad Cantidad a restar del stock
+ * @return bool true si se actualizó el stock, false en caso contrario
+ */
+function restarStock(PDO $conn, int $productoId, int $cantidad): bool {
+    try {
+        // 1. Consultar stock actual
+        $sql = "SELECT stock FROM productos WHERE id = :id";
+        $stmt = $conn->prepare($sql);
+        $stmt->bindParam(':id', $productoId, PDO::PARAM_INT);
+        $stmt->execute();
+        $producto = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // 2. Validar si existe el producto
+        if (!$producto) {
+            return false; // Producto no encontrado
+        }
+
+        $stockActual = (int) $producto['stock'];
+
+        // 3. Verificar que el stock sea suficiente
+        if ($stockActual < $cantidad) {
+            return false; // No hay stock suficiente
+        }
+
+        // 4. Restar stock
+        $nuevoStock = $stockActual - $cantidad;
+
+        $updateSql = "UPDATE productos SET stock = :nuevoStock WHERE id = :id";
+        $updateStmt = $conn->prepare($updateSql);
+        $updateStmt->bindParam(':nuevoStock', $nuevoStock, PDO::PARAM_INT);
+        $updateStmt->bindParam(':id', $productoId, PDO::PARAM_INT);
+
+        return $updateStmt->execute();
+    } catch (PDOException $e) {
+        error_log("Error al restar stock: " . $e->getMessage());
+        return false;
+    }
+}
