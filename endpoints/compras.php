@@ -43,6 +43,14 @@ switch ($method) {
             exit;
         }
 
+        $id_producto = (int)$data['id_producto'];
+        
+        if(!validarDisponibilidad($conn, $id_producto)) {
+            http_response_code(409); // Conflict
+            echo json_encode(["error" => "El producto no está disponible"]);
+            exit();
+        }
+
         $folio = generarFolioUnico($conn);
 
         try {
@@ -57,7 +65,7 @@ switch ($method) {
         } catch (PDOException $e) {
             echo json_encode([
                 "error" => $e->getMessage(),
-                "message" => "No se pudo agregar la compra"
+                "message" => "No se pudo registrar la compra"
             ]);
         }
         break;
