@@ -44,8 +44,10 @@ switch ($method) {
         }
 
         $id_producto = (int)$data['id_producto'];
+
+        $estaDisponible = validarDisponibilidad($conn, $id_producto);
         
-        if(!validarDisponibilidad($conn, $id_producto)) {
+        if(!$estaDisponible) {
             http_response_code(409); // Conflict
             echo json_encode(["error" => "El producto no está disponible"]);
             exit();
