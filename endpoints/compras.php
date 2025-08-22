@@ -34,22 +34,22 @@ switch ($method) {
     case 'POST':
         $data = json_decode(file_get_contents("php://input"), true);
 
-        $id = $data['id'] ?? null;
-        $folio = $data['folio'] ?? null;
         $compra_total = $data['compra_total'] ?? null;
         $id_producto = $data['id_producto'] ?? null;
 
-        if (!$folio || !$compra_total || !$id_producto) {
+        if (!$compra_total || !$id_producto) {
             echo json_encode(["error" => "Faltan datos"]);
             http_response_code(400);
             exit;
         }
 
+        $folio = generarFolioUnico($conn);
+
         try {
             $sql = "INSERT INTO compras (folio, compra_total, id_producto) VALUES (:folio, :compra_total, :id_producto)";
             $stmt = $conn->prepare($sql);
             $stmt->execute([
-                ":folio" => $data['folio'],
+                ":folio" => $folio,
                 ":compra_total" => $data['compra_total'],
                 ":id_producto" => $data['id_producto']
             ]);
