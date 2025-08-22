@@ -1,13 +1,32 @@
 <?php
 switch ($method) {
     case 'GET':
-        if (isset($_GET['id'])) {
-            $stmt = $conn->prepare("SELECT * FROM productos WHERE id=?");
-            $stmt->execute([$_GET['id']]);
-            echo json_encode($stmt->fetch(PDO::FETCH_ASSOC));
+        $data = json_decode(file_get_contents("php://input"), true);
+        $id = $data['id'] ?? null;
+        
+        if ($id) {
+            $stmt = $conn->prepare("SELECT * FROM productos WHERE id = ?");
+            $stmt->execute([$id]);
+            $producto = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($producto) {
+                http_response_code(200);
+                echo json_encode($producto);
+            } else {
+                http_response_code(404);
+                echo json_encode(["error" => "Producto no encontrado"]);
+            }
         } else {
             $stmt = $conn->query("SELECT * FROM productos");
-            echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
+            $productos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            if ($productos) {
+                http_response_code(200);
+                echo json_encode($productos);
+            } else {
+                http_response_code(204);
+                echo json_encode(["message" => "No hay productos disponibles"]);
+            }
         }
         break;
 
@@ -48,7 +67,7 @@ switch ($method) {
         // Leyendo el ID desde el query string 
         $id = $_GET['id'] ?? null;
         // Leyendo el ID desde el Body (JSON o raw data)
-        if(!$id){
+        if (!$id) {
             $data = json_decode(file_get_contents("php://input"), true);
             $id = $data['id'] ?? null;
         }

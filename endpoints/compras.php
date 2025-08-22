@@ -1,8 +1,34 @@
 <?php
 switch ($method) {
     case 'GET':
-        $stmt = $conn->query("SELECT * FROM compras");
-        echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
+        $data = json_decode(file_get_contents("php://input"), true);
+
+        $id = $data['id'] ?? null;
+
+        if ($id) {
+            $stmt = $conn->prepare("SELECT * FROM compras WHERE id = ?");
+            $stmt->execute([$id]);
+            $compra = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($compra) {
+                http_response_code(200);
+                echo json_encode($compra);
+            } else {
+                http_response_code(404);
+                echo json_encode(["error" => "Compra no encontrada"]);
+            }
+        } else {
+            $stmt = $conn->query("SELECT * FROM compras");
+            $compras = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            if ($compras) {
+                http_response_code(200);
+                echo json_encode($compras);
+            } else {
+                http_response_code(204);
+                echo json_encode(["message" => "No hay compras disponibles"]);
+            }
+        }
         break;
 
     case 'POST':
@@ -20,7 +46,7 @@ switch ($method) {
         }
 
         try {
-            $sql ="INSERT INTO compras (folio, compra_total, id_producto) VALUES (:folio, :compra_total, :id_producto)";
+            $sql = "INSERT INTO compras (folio, compra_total, id_producto) VALUES (:folio, :compra_total, :id_producto)";
             $stmt = $conn->prepare($sql);
             $stmt->execute([
                 ":folio" => $data['folio'],
@@ -62,8 +88,8 @@ switch ($method) {
             echo json_encode(["message" => "Compra actualizada correctamente"]);
         } catch (PDOException $e) {
             echo json_encode([
-               "error" => $e->getMessage(),
-               "message" => "No se puede actualizar la compra con ID: " + $id
+                "error" => $e->getMessage(),
+                "message" => "No se puede actualizar la compra con ID: " + $id
             ]);
         }
         break;
