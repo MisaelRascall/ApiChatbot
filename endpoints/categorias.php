@@ -63,9 +63,8 @@ switch ($method) {
 
     case 'DELETE':
         $id = $_GET['id'] ?? null;
-
         if (!$id) {
-            parse_str(file_get_contents("php://input"), $data);
+            $data = json_decode(file_get_contents("php://input"), true);
             $id = $data['id'] ?? null;
         }
 
@@ -73,8 +72,10 @@ switch ($method) {
             $stmt = $conn->prepare("DELETE FROM categorias WHERE id=?");
             $stmt->execute([$id]);
             echo json_encode(["status" => "Categoría eliminada"]);
+            http_response_code(200);
         } else {
             echo json_encode(["error" => "ID requerido"]);
+            http_response_code(400);
         }
         break;
 
