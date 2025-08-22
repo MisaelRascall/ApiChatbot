@@ -7,35 +7,65 @@ switch ($method) {
 
     case 'POST':
         $data = json_decode(file_get_contents("php://input"), true);
-        if (!$data || !isset($data['folio'], $data['compra_total'], $data['id_producto'])) {
-            echo json_encode(["error" => "Faltan datos obligatorios"]);
+
+        $id = $data['id'] ?? null;
+        $folio = $data['folio'] ?? null;
+        $compra_total = $data['compra_total'] ?? null;
+        $id_producto = $data['id_producto'] ?? null;
+
+        if (!$folio || !$compra_total || !$id_producto) {
+            echo json_encode(["error" => "Faltan datos"]);
             http_response_code(400);
             exit;
         }
-        $stmt = $conn->prepare("INSERT INTO compras (folio, compra_total, id_producto) VALUES (:folio, :compra_total, :id_producto)");
-        $stmt->execute([
-            ":folio" => $data['folio'],
-            ":compra_total" => $data['compra_total'],
-            ":id_producto" => $data['id_producto']
-        ]);
-        echo json_encode(["message" => "Compra creada correctamente"]);
+
+        try {
+            $sql ="INSERT INTO compras (folio, compra_total, id_producto) VALUES (:folio, :compra_total, :id_producto)";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute([
+                ":folio" => $data['folio'],
+                ":compra_total" => $data['compra_total'],
+                ":id_producto" => $data['id_producto']
+            ]);
+            echo json_encode(["message" => "Compra creada correctamente"]);
+        } catch (PDOException $e) {
+            echo json_encode([
+                "error" => $e->getMessage(),
+                "message" => "No se pudo agregar la compra"
+            ]);
+        }
         break;
 
     case 'PUT':
         $data = json_decode(file_get_contents("php://input"), true);
-        if (!$id || !$data) {
+
+        $id = $data['id'] ?? null;
+        $folio = $data['folio'] ?? null;
+        $compra_total = $data['compra_total'] ?? null;
+        $id_producto = $data['id_producto'] ?? null;
+
+        if (!$id || !$folio || !$compra_total || !$id_producto) {
             echo json_encode(["error" => "Datos insuficientes"]);
             http_response_code(400);
             exit;
         }
-        $stmt = $conn->prepare("UPDATE compras SET folio = :folio, compra_total = :compra_total, id_producto = :id_producto WHERE id = :id");
-        $stmt->execute([
-            ":folio" => $data['folio'],
-            ":compra_total" => $data['compra_total'],
-            ":id_producto" => $data['id_producto'],
-            ":id" => $id
-        ]);
-        echo json_encode(["message" => "Compra actualizada correctamente"]);
+
+        try {
+            $sql = "UPDATE compras SET folio = :folio, compra_total = :compra_total, id_producto = :id_producto WHERE id = :id";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute([
+                ":folio" => $data['folio'],
+                ":compra_total" => $data['compra_total'],
+                ":id_producto" => $data['id_producto'],
+                ":id" => $id
+            ]);
+            echo json_encode(["message" => "Compra actualizada correctamente"]);
+        } catch (PDOException $e) {
+            echo json_encode([
+               "error" => $e->getMessage(),
+               "message" => "No se puede actualizar la compra con ID: " + $id
+            ]);
+        }
         break;
 
     case 'DELETE':
