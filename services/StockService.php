@@ -1,6 +1,4 @@
 <?php
-require_once __DIR__ . "/../config/conexion.php"; // Ajuste de ruta a tu archivo de conexión
-
 /**
  * Cambia la disponibilidad de un producto.
  * 
