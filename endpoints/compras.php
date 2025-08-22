@@ -58,9 +58,12 @@ switch ($method) {
             $stmt = $conn->prepare($sql);
             $stmt->execute([
                 ":folio" => $folio,
-                ":compra_total" => $data['compra_total'],
-                ":id_producto" => $data['id_producto']
+                ":compra_total" => $compra_total,
+                ":id_producto" => $id_producto
             ]);
+
+            restarStock($conn, $id_producto);
+
             echo json_encode(["message" => "Compra creada correctamente"]);
         } catch (PDOException $e) {
             echo json_encode([
