@@ -58,8 +58,7 @@ function validarDisponibilidad(PDO $conn, int $productoId): bool {
  * @param int $productoId ID del producto a decrementar
  * @return bool true si se actualizó correctamente, false si hubo error
  */
-function restarStock(PDO $conn, int $productoId): bool { // FALTA APLICAR LA FUNCIÓN PARA CAMBIAR LA DISPONIBILIDAD
-    // Primero obtenemos el stock actual
+function restarStock(PDO $conn, int $productoId): bool { 
     $sql = "SELECT stock FROM productos WHERE id = :id";
     $stmt = $conn->prepare($sql);
     $stmt->bindParam(':id', $productoId, PDO::PARAM_INT);
@@ -71,6 +70,8 @@ function restarStock(PDO $conn, int $productoId): bool { // FALTA APLICAR LA FUN
     }
 
     $nuevoStock = $producto['stock'] - 1;
+
+    if($nuevoStock <= 0) cambiarDisponibilidad($conn, $productoId, true);
 
     // Actualizamos en la tabla
     $sql = "UPDATE productos SET stock = :stock WHERE id = :id";
