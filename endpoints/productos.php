@@ -45,13 +45,11 @@ switch ($method) {
         break;
 
     case 'DELETE':
-        
         // Leyendo el ID desde el query string 
         $id = $_GET['id'] ?? null;
-
         // Leyendo el ID desde el Body (JSON o raw data)
         if(!$id){
-            parse_str(file_get_contents("php://input"), $data);
+            $data = json_decode(file_get_contents("php://input"), true);
             $id = $data['id'] ?? null;
         }
 
@@ -59,8 +57,11 @@ switch ($method) {
             $stmt = $conn->prepare("DELETE FROM productos WHERE id=?");
             $stmt->execute([$id]);
             echo json_encode(["status" => "Producto eliminado"]);
+            http_response_code(200);
         } else {
             echo json_encode(["error" => "ID requerido"]);
+            http_response_code(400);
+            exit;
         }
         break;
 
