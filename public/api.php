@@ -26,8 +26,8 @@ switch ($resource) {
         include "../endpoints/productos.php";
         break;
 
-    case 'compra':
-        include "../endpoints/compra.php";
+    case 'compras':
+        include "../endpoints/compras.php";
         break;
 
     case 'ping':
