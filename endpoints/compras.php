@@ -39,15 +39,23 @@ switch ($method) {
         break;
 
     case 'DELETE':
+        $id = $_GET['id'] ?? null;
+
         if (!$id) {
+            $data = json_decode(file_get_contents("php://input"), true);
+            $id = $data['id'] ?? null;
+        }
+
+        if (isset($id)) {
+            $stmt = $conn->prepare("DELETE FROM compras WHERE id = ?");
+            $stmt->execute([$id]);
+            echo json_encode(["status" => "Compra eliminada"]);
+            http_response_code(200);
+        } else {
             echo json_encode(["error" => "ID requerido"]);
             http_response_code(400);
             exit;
         }
-        $stmt = $conn->prepare("DELETE FROM compras WHERE id = :id");
-        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
-        $stmt->execute();
-        echo json_encode(["message" => "Compra eliminada correctamente"]);
         break;
 
     default:
