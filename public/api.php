@@ -15,6 +15,7 @@ require_once "../services/StockService.php"; // Servicio para stock y disponibil
 require_once "../services/FolioService.php"; // Servicio para generar el Folio
 require_once "../services/ProductoService.php"; // Servicio para la lógica de Productos
 require_once "../services/CategoriaService.php"; // Servicio para la lógica de Categorias
+require_once "../services/CompraService.php"; // Servicio para la lógica de Compras
 
 $method = $_SERVER['REQUEST_METHOD'];
 $path = explode('/', trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/'));
