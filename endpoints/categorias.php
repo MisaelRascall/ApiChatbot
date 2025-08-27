@@ -1,11 +1,16 @@
 <?php
 switch ($method) {
     case 'GET':
-        $data = json_decode(file_get_contents("php://input"), true);
+        $id = $_GET['id'] ?? null;
+        $request = $_GET['request'] ?? null;
 
-        $id = $data['id'] ?? null;
+        if(!$id && !$request){
+            $data = json_decode(file_get_contents("php://input"), true);
+            $id = $data['id'] ?? null;
+            $request = $data['request'] ?? null;
+        }
 
-        if ($id) {
+        if (isset($id)) {
             $stmt = $conn->prepare("SELECT * FROM categorias WHERE id = ?");
             $stmt->execute([$id]);
             $categoria = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -16,6 +21,16 @@ switch ($method) {
             } else {
                 http_response_code(404);
                 echo json_encode(["error" => "Categoría no encontrada"]);
+            }
+        } else if($request === "nombre"){
+            $listaCategorias = getCategorias($conn);
+
+            if(isset($listaCategorias)){
+                http_response_code(200);
+                echo json_encode($listaCategorias);
+            } else{
+                http_response_code(204);
+                echo json_encode(["message" => "No hay categorias en existencia"]);
             }
         } else {
             $stmt = $conn->query("SELECT * FROM categorias");
