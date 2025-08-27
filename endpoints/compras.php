@@ -1,11 +1,16 @@
 <?php
 switch ($method) {
     case 'GET':
-        $data = json_decode(file_get_contents("php://input"), true);
+        $id = $_GET['id'] ?? null;
+        $folio = $_GET['folio'] ?? null;
 
-        $id = $data['id'] ?? null;
-
-        if ($id) {
+        if(!$id && !$folio){
+            $data = json_decode(file_get_contents("php://input"), true);
+            $id = $data['id'] ?? null;
+            $folio = $data['folio'] ?? null;
+        }
+        
+        if (isset($id)) {
             $stmt = $conn->prepare("SELECT * FROM compras WHERE id = ?");
             $stmt->execute([$id]);
             $compra = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -16,6 +21,16 @@ switch ($method) {
             } else {
                 http_response_code(404);
                 echo json_encode(["error" => "Compra no encontrada"]);
+            }
+        } else if(isset($folio)){
+            $compra = buscarCompraPorFolio($conn, $folio);
+
+            if(isset($compra)){
+                http_response_code(200);
+                echo json_encode($compra);
+            } else {
+                http_response_code(204);
+                echo json_encode(["message" => "No existe compra con ese folio"]);
             }
         } else {
             $stmt = $conn->query("SELECT * FROM compras");
