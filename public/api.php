@@ -13,6 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 require_once "../config/conexion.php"; // Conexión a la Base de Datos
 require_once "../services/StockService.php"; // Servicio para stock y disponibilidad
 require_once "../services/FolioService.php"; // Servicio para generar el Folio
+require_once "../services/ProductoService.php"; // Servicio para la lógica de Productos
 
 $method = $_SERVER['REQUEST_METHOD'];
 $path = explode('/', trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/'));
