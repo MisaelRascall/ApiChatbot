@@ -1,10 +1,16 @@
 <?php
 switch ($method) {
     case 'GET':
-        $data = json_decode(file_get_contents("php://input"), true);
-        $id = $data['id'] ?? null;
-
-        if ($id) {
+        $id = $_GET['id'] ?? null;
+        $id_categoria = $_GET['id_categoria'] ?? null;
+        
+        if (!$id && !$id_categoria) {
+            $data = json_decode(file_get_contents("php://input"), true);
+            $id = $data['id'] ?? null;
+            $id_categoria = $data['id_categoria'] ?? null;
+        }
+        
+        if (isset($id)) {
             $stmt = $conn->prepare("SELECT * FROM productos WHERE id = ?");
             $stmt->execute([$id]);
             $producto = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -15,6 +21,16 @@ switch ($method) {
             } else {
                 http_response_code(404);
                 echo json_encode(["error" => "Producto no encontrado"]);
+            }
+        } else if (isset($id_categoria)) {
+            $listaProductos = consultarProductosPorCategoria($conn, $id_categoria);
+
+            if (isset($listaProductos)) {
+                http_response_code(200);
+                echo json_encode($listaProductos);
+            } else {
+                http_response_code(204);
+                echo json_encode(["message" => "No hay productos en existencia"]);
             }
         } else {
             $stmt = $conn->query("SELECT * FROM productos");
